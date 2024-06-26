@@ -1,0 +1,113 @@
+---
+title: "FuncionSenx"
+output: pdf_document
+date: "2023-11-14"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include=FALSE}
+library(tidyverse)
+library(rmarkdown)
+library(tinytex)
+library(scales)
+library(ggrepel)
+library(lubridate)
+```
+
+
+# Función para calcular el fitness (valor absoluto de sin(x))
+```{r}
+funcion_fitness <- function(x) {
+  return(abs(sin(x)))
+}
+
+```
+
+# Función para inicializar la población
+```{r}
+inicializar_poblacion <- function(tamano_poblacion) {
+  return(runif(tamano_poblacion, 0, 32))
+}
+
+```
+
+# Función de selección (torneo)
+```{r}
+seleccion <- function(valores_fitness, tamano_torneo) {
+  indices_seleccionados <- sample(seq_along(valores_fitness), tamano_torneo)
+  individuo_seleccionado <- which.min(valores_fitness[indices_seleccionados])
+  return(individuo_seleccionado)
+}
+```
+
+# Función de cruce (crossover)
+```{r}
+cruce <- function(padre1, padre2) {
+  return((padre1 + padre2) / 2)
+}
+```
+
+# Función de mutación
+```{r}
+mutacion <- function(hijo, tasa_mutacion) {
+  if (runif(1) < tasa_mutacion) {
+    hijo <- hijo + rnorm(1, 0, 1)  # Pequeño cambio aleatorio
+  }
+  return(hijo)
+}
+```
+
+# Algoritmo genético
+```{r}
+algoritmo_genetico <- function(tamano_poblacion, generaciones, tamano_torneo, tasa_mutacion) {
+  # Inicializar población
+  poblacion <- inicializar_poblacion(tamano_poblacion)
+  
+  for (gen in 1:generaciones) {
+    # Calcular fitness
+    valores_fitness <- sapply(poblacion, funcion_fitness)
+    
+    # Seleccionar padres
+    padre1 <- poblacion[seleccion(valores_fitness, tamano_torneo)]
+    padre2 <- poblacion[seleccion(valores_fitness, tamano_torneo)]
+    
+    # Aplicar cruce
+    hijo <- cruce(padre1, padre2)
+    
+    # Aplicar mutación
+    hijo <- mutacion(hijo, tasa_mutacion)
+    
+    # Reemplazar peor individuo en la población con el hijo
+    peor_indice <- which.max(valores_fitness)
+    poblacion[peor_indice] <- hijo
+  }
+  
+  # Devolver el mejor individuo encontrado
+  mejor_indice <- which.max(sapply(poblacion, funcion_fitness))
+  return(poblacion[mejor_indice])
+}
+```
+
+# Parámetros del algoritmo
+```{r}
+tamano_poblacion <- 50
+generaciones <- 100
+tamano_torneo <- 5
+tasa_mutacion <- 0.1
+
+```
+
+# Ejecutar algoritmo genético
+```{r}
+resultado <- algoritmo_genetico(tamano_poblacion, generaciones, tamano_torneo, tasa_mutacion)
+
+cat("Resultado óptimo encontrado:", resultado, "\n")
+cat("Valor de la función fitness en el resultado:", funcion_fitness(resultado), "\n")
+```
+
+
+
+

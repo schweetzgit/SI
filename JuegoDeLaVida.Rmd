@@ -1,0 +1,111 @@
+---
+title: "Juego de la vida"
+output:
+  pdf_document: default
+  html_document: default
+date: "2023-10-15"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include=FALSE}
+library(tidyverse)
+library(rmarkdown)
+library(tinytex)
+library(scales)
+library(ggrepel)
+library(lubridate)
+```
+
+
+# Tamaño del tablero
+```{r}
+filas <- 16 
+columnas <- 16
+```
+
+
+
+# Función para inicializar el tablero con células vivas de forma aleatoria
+```{r}
+inicializar_tablero <- function(filas, columnas) {
+  tablero <- matrix(sample(c(0, 1), filas * columnas, replace = TRUE), nrow = filas, ncol = columnas)
+  return(tablero)
+}
+```
+
+
+# Función para calcular el siguiente estado del tablero
+```{r}
+siguiente_estado <- function(tablero) {
+  vecinos <- cbind(c(-1, -1, -1, 0, 0, 1, 1, 1), c(-1, 0, 1, -1, 1, -1, 0, 1))
+  for (i in 1:nrow(tablero)) {
+    for (j in 1:ncol(tablero)) {
+      vivos_vecinos <- sum(sapply(1:8, function(k) {
+        if (i + vecinos[k, 1] > 0 && i + vecinos[k, 1] <= nrow(tablero) &&
+            j + vecinos[k, 2] > 0 && j + vecinos[k, 2] <= ncol(tablero)) {
+          tablero[i + vecinos[k, 1], j + vecinos[k, 2]]
+        } else {
+          0
+        }
+      }))
+      if (tablero[i, j] == 1) {
+        if (vivos_vecinos < 2 || vivos_vecinos > 3) {
+          tablero[i, j] <- 0
+        }
+      } else {
+        if (vivos_vecinos == 3) {
+          tablero[i, j] <- 1
+        }
+      }
+    }
+  }
+  return(tablero)
+}
+```
+
+
+
+# Función para imprimir el tablero
+
+```{r}
+imprimir_tablero <- function(tablero) {
+  for (i in 1:nrow(tablero)) {
+    for (j in 1:ncol(tablero)) {
+      if (tablero[i, j] == 1) {
+        cat("* ")
+      } else {
+        cat(". ")
+      }
+    }
+    cat("\n")
+  }
+}
+```
+
+
+
+# Ejecución del juego
+```{r}
+tablero <- inicializar_tablero(filas, columnas)
+generaciones <- 6
+
+for (gen in 1:generaciones) {
+  cat("Generación ", gen, ":\n")
+  imprimir_tablero(tablero)
+  tablero <- siguiente_estado(tablero)
+}
+```
+
+
+
+
+
+
+
+
+
+
+
